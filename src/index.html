@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Excel ke Supabase</title>
+</head>
+<body>
+    <h1>Upload Data Excel</h1>
+    <form action="/api/uploadProducts" method="post" enctype="multipart/form-data">
+        <label for="excelFile">Pilih file Excel (.xlsx):</label>
+        <input type="file" id="excelFile" name="excelFile" accept=".xlsx" required>
+        <button type="submit">Upload</button>
+    </form>
+</body>
+</html>
