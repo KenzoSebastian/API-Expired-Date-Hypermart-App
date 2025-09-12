@@ -1,11 +1,32 @@
+import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
+import { asc } from "drizzle-orm";
+import * as xlsx from "xlsx";
 import { db } from "../config/db.js";
 import { products } from "../db/schema.js";
-import * as xlsx from "xlsx";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const allproducts = await db.select().from(products);
-    res.status(200).json({ status: "OK", data: allproducts });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const offset = (page - 1) * limit;
+
+    const paginatedProducts = await db
+      .select()
+      .from(products)
+      .orderBy(asc(products.expiredDate))
+      .limit(limit)
+      .offset(offset);
+
+    res.status(200).json({
+      status: "OK",
+      data: paginatedProducts,
+      meta: {
+        page: page,
+        limit: limit,
+      },
+    });
   } catch (error) {
     console.error("Error fetching products:", error);
     res
@@ -55,12 +76,33 @@ export const uploadProducts = async (req, res) => {
           return null;
         }
 
+        const arrayExpiredDate = item["Expired"].split("-");
+        if (arrayExpiredDate.length !== 3) {
+          console.warn(
+            `Peringatan: Baris ke-${
+              index + 2
+            } di Excel dilewati karena tanggal kadaluarsa tidak valid.`
+          );
+          return null;
+        }
+
+        const productInDateRaw = item["product in date"];
+        const productInDateFormat = format(
+          new Date(productInDateRaw),
+          "dd-MMMM-yyyy",
+          {
+            locale: enUS,
+          }
+        );
+
         return {
           sjStmNumber: item["SJ : STM"],
           skuNumber,
           description: item["DESCRIPTION"].trim(),
           quantity,
           expiredDate: item["Expired"],
+          createdAt: productInDateFormat,
+          updatedAt: productInDateFormat,
         };
       })
       .filter(Boolean);
@@ -71,7 +113,7 @@ export const uploadProducts = async (req, res) => {
         .send("Tidak ada data valid yang bisa dimasukkan setelah validasi.");
     }
 
-    // await db.insert(products).values(dataToInsert);
+    await db.insert(products).values(dataToInsert);
 
     res.status(200).json({
       message: `Sukses! ${dataToInsert.length} baris data berhasil diproses.`,
