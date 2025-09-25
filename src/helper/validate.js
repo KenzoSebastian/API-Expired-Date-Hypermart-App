@@ -2,11 +2,7 @@ import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 
 export const validateProductData = (value, fieldName, type, errors) => {
-  if (
-    value === undefined ||
-    value === null ||
-    (typeof value === "string" && value.trim() === "")
-  ) {
+  if (value === undefined || value === null || (typeof value === "string" && value.trim() === "")) {
     errors.push(`${fieldName} is missing.`);
     return null;
   }
@@ -28,21 +24,15 @@ export const validateProductData = (value, fieldName, type, errors) => {
       return int;
     case "string":
       return value.toString().trim();
-    case "date_ddmmyyyy": // Format khusus untuk DD-MM-YYYY
+    case "date_ddmmyyyy": // Format khusus untuk DD-MMMM-YYYY
       const arrDate = value.split("-");
       if (arrDate.length !== 3) {
-        errors.push(
-          `${fieldName} "${value}" format is invalid. Expected DD-MM-YYYY.`
-        );
+        errors.push(`${fieldName} "${value}" format is invalid. Expected DD-MMMM-YYYY.`);
         return null;
       } else {
-        const dateFormatted = format(
-          new Date(value.replace(/\./g, "")),
-          "dd-MM-yyyy",
-          {
-            locale: enUS,
-          }
-        );
+        const dateFormatted = format(new Date(value.replace(/\./g, "")), "dd-MMMM-yyyy", {
+          locale: enUS,
+        });
         return dateFormatted;
       }
     default:

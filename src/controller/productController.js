@@ -103,10 +103,7 @@ export const uploadProducts = async (req, res) => {
       });
     }
 
-    // const insertedProducts = await db
-    //   .insert(products)
-    //   .values(dataToInsert)
-    //   .returning();
+    const insertedProducts = await db.insert(products).values(dataToInsert).returning();
 
     let successMessage = `Successfully processed ${dataToInsert.length} product(s).`;
     if (invalidRows.length > 0) {
@@ -116,7 +113,7 @@ export const uploadProducts = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: successMessage,
-      data: null,
+      data: insertedProducts,
       meta: {
         totalProcessed: dataToInsert.length,
         totalInvalid: invalidRows.length,
