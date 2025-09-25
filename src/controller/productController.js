@@ -1,43 +1,49 @@
-import { format } from "date-fns";
-import { enUS } from "date-fns/locale";
-import { asc } from "drizzle-orm";
+import { asc, count } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { db } from "../config/db.js";
 import { products } from "../db/schema.js";
+import { validateProductData } from "../helper/validate.js";
 
 export const getAllProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-
     const offset = (page - 1) * limit;
 
-    const paginatedProducts = await db
-      .select()
-      .from(products)
-      .orderBy(asc(products.expiredDate))
-      .limit(limit)
-      .offset(offset);
+    const productsQuery = db.select().from(products).orderBy(asc(products.expiredDate)).limit(limit).offset(offset);
+    const totalProductsQuery = db.select({ total: count() }).from(products);
+
+    const [paginatedProducts, totalResult] = await Promise.all([productsQuery, totalProductsQuery]);
+
+    const totalItems = totalResult[0].total;
+
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
 
     res.status(200).json({
-      status: "OK",
+      status: "success",
+      message: "Products retrieved successfully",
       data: paginatedProducts,
-      meta: {
-        page: page,
-        limit: limit,
-      },
+      meta: { page, limit, totalItems, totalPages, hasNextPage, hasPrevPage },
     });
   } catch (error) {
     console.error("Error fetching products:", error);
-    res
-      .status(500)
-      .json({ status: "ERROR", message: "Failed to fetch products" });
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch products. Please try again later.",
+      data: null,
+    });
   }
 };
 
 export const uploadProducts = async (req, res) => {
   if (!req.file) {
-    return res.status(400).send("Tidak ada file yang di-upload.");
+    return res.status(400).json({
+      status: "error",
+      message: "No file uploaded. Please provide an Excel file.",
+      data: null,
+    });
   }
 
   try {
@@ -47,80 +53,82 @@ export const uploadProducts = async (req, res) => {
     const dataFromExcel = xlsx.utils.sheet_to_json(worksheet);
 
     if (dataFromExcel.length === 0) {
-      return res.status(400).send("File Excel kosong atau tidak ada data.");
+      return res.status(400).json({
+        status: "error",
+        message: "The Excel file is empty or contains no data.",
+        data: null,
+      });
     }
 
-    const dataToInsert = dataFromExcel
-      .map((item, index) => {
-        const rawSku = item["SKU"];
-        const rawQuantity = item["QTY_SCAN"];
+    const processedData = dataFromExcel.map((item, index) => {
+      const rowNumber = index + 2;
+      const errors = [];
 
-        if (!rawSku) {
-          console.warn(
-            `Peringatan: Baris ke-${
-              index + 2
-            } di Excel dilewati karena SKU kosong.`
-          );
-          return null;
-        }
-
-        const skuNumber = parseInt(rawSku, 10);
-        const quantity = parseFloat(rawQuantity);
-
-        if (isNaN(skuNumber) || isNaN(quantity)) {
-          console.warn(
-            `Peringatan: Baris ke-${
-              index + 2
-            } di Excel dilewati karena SKU atau Kuantitas bukan angka.`
-          );
-          return null;
-        }
-
-        const arrayExpiredDate = item["Expired"].split("-");
-        if (arrayExpiredDate.length !== 3) {
-          console.warn(
-            `Peringatan: Baris ke-${
-              index + 2
-            } di Excel dilewati karena tanggal kadaluarsa tidak valid.`
-          );
-          return null;
-        }
-
-        const productInDateRaw = item["product in date"];
-        const productInDateFormat = format(
-          new Date(productInDateRaw),
-          "dd-MMMM-yyyy",
-          {
-            locale: enUS,
-          }
-        );
-
+      // --- Validasi Data per Kolom ---
+      const sjStmNumber = validateProductData(item["SJ : STM"], "SJ : STM", "string", errors);
+      const skuNumber = validateProductData(item["SKU"], "SKU", "integer", errors);
+      const description = validateProductData(item["DESCRIPTION"], "DESCRIPTION", "string", errors);
+      const quantity = validateProductData(item["QTY_SCAN"], "QTY_SCAN", "number", errors);
+      const expiredDateObj = validateProductData(item["Expired"], "Expired date", "date_ddmmyyyy", errors);
+      const productInDateObj = validateProductData(item["product in date"], "Product in date", "date_ddmmyyyy", errors);
+      if (errors.length > 0) {
         return {
-          sjStmNumber: item["SJ : STM"],
-          skuNumber,
-          description: item["DESCRIPTION"].trim(),
-          quantity,
-          expiredDate: item["Expired"],
-          createdAt: productInDateFormat,
-          updatedAt: productInDateFormat,
+          row: rowNumber,
+          data: item,
+          errors,
         };
-      })
-      .filter(Boolean);
+      }
+
+      return {
+        sjStmNumber,
+        skuNumber,
+        description,
+        quantity,
+        expiredDate: expiredDateObj,
+        createdAt: productInDateObj,
+        updatedAt: productInDateObj,
+      };
+    });
+
+    // Pisahkan data yang valid dari baris yang tidak valid
+    const dataToInsert = processedData.filter((item) => !item.errors);
+    const invalidRows = processedData.filter((item) => item.errors);
 
     if (dataToInsert.length === 0) {
-      return res
-        .status(400)
-        .send("Tidak ada data valid yang bisa dimasukkan setelah validasi.");
+      return res.status(400).json({
+        status: "error",
+        message: "No valid data found in the Excel file after validation.",
+        details: invalidRows,
+        data: null,
+      });
     }
 
-    await db.insert(products).values(dataToInsert);
+    // const insertedProducts = await db
+    //   .insert(products)
+    //   .values(dataToInsert)
+    //   .returning();
+
+    let successMessage = `Successfully processed ${dataToInsert.length} product(s).`;
+    if (invalidRows.length > 0) {
+      successMessage += ` However, ${invalidRows.length} row(s) contained invalid data and were skipped.`;
+    }
 
     res.status(200).json({
-      message: `Sukses! ${dataToInsert.length} baris data berhasil diproses.`,
-      data: dataToInsert,
+      status: "success",
+      message: successMessage,
+      data: null,
+      meta: {
+        totalProcessed: dataToInsert.length,
+        totalInvalid: invalidRows.length,
+        invalidRowsDetails: invalidRows,
+      },
     });
   } catch (error) {
-    console.error("Terjadi kesalahan:", error);
-    res.status(500).json({ message: `Terjadi kesalahan: ${error.message}` });
+    console.error("Error uploading products:", error);
+    res.status(500).json({
+      status: "error",
+      message: `Failed to upload products due to an internal server error: ${error.message}`,
+      data: null,
+    });
   }
 };
