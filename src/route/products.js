@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAllProducts,
+  getProductsByCategory,
   uploadProducts,
 } from "../controller/productController.js";
 import multer from "multer";
@@ -10,6 +11,8 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 ProductRoute.get("/products", getAllProducts);
+
+ProductRoute.get("/productCategories/:productCategory", getProductsByCategory);
 
 ProductRoute.post(
   "/uploadProducts",
