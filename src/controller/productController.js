@@ -13,7 +13,12 @@ export const getAllProducts = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    const productsQuery = db.select().from(products).orderBy(asc(products.expiredDate)).limit(limit).offset(offset);
+    const productsQuery = db
+      .select()
+      .from(products)
+      .orderBy(asc(products.expiredDate))
+      .limit(limit)
+      .offset(offset);
     const totalProductsQuery = db.$count(products);
 
     const [paginatedProducts, totalItems] = await Promise.all([productsQuery, totalProductsQuery]);
@@ -21,6 +26,12 @@ export const getAllProducts = async (req, res) => {
     const totalPages = Math.ceil(totalItems / limit);
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
+
+    paginatedProducts.forEach((product) => {
+      product.expiredDate = format(product.expiredDate, "dd MMMM yyyy", { locale: enUS });
+      product.createdAt = format(product.createdAt, "dd MMMM yyyy", { locale: enUS });
+      product.updatedAt = format(product.updatedAt, "dd MMMM yyyy", { locale: enUS });
+    });
 
     res.status(200).json({
       status: "success",
@@ -69,7 +80,8 @@ export const getProductsByCategory = async (req, res) => {
           and(gte(product.expiredDate, formatToday), lt(product.expiredDate, formatSevenDays));
         break;
       case "expiringLater":
-        whereConditionFn = (product, { between }) => between(product.expiredDate, formatSevenDays, formatFourteenDays);
+        whereConditionFn = (product, { between }) =>
+          between(product.expiredDate, formatSevenDays, formatFourteenDays);
         break;
       case "goodProducts":
         whereConditionFn = (product, { gt }) => gt(product.expiredDate, formatFourteenDays);
@@ -95,6 +107,12 @@ export const getProductsByCategory = async (req, res) => {
     const totalPages = Math.ceil(totalItems / limit);
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
+
+    productsData.forEach((product) => {
+      product.expiredDate = format(product.expiredDate, "dd MMMM yyyy", { locale: enUS });
+      product.createdAt = format(product.createdAt, "dd MMMM yyyy", { locale: enUS });
+      product.updatedAt = format(product.updatedAt, "dd MMMM yyyy", { locale: enUS });
+    });
 
     return res.status(200).json({
       status: "success",
@@ -152,7 +170,12 @@ export const uploadProducts = async (req, res) => {
       const description = validateProductData(item["DESCRIPTION"], "DESCRIPTION", "string", errors);
       const quantity = validateProductData(item["QTY_SCAN"], "QTY_SCAN", "number", errors);
       const expiredDateObj = validateProductData(item["Expired"], "Expired date", "date_ddmmyyyy", errors);
-      const productInDateObj = validateProductData(item["product in date"], "Product in date", "date_ddmmyyyy", errors);
+      const productInDateObj = validateProductData(
+        item["product in date"],
+        "Product in date",
+        "date_ddmmyyyy",
+        errors
+      );
       if (errors.length > 0) {
         return {
           row: rowNumber,
