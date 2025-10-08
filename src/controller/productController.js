@@ -11,12 +11,13 @@ export const getAllProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const sortBy = req.query.sortby || "expiredDate";
     const offset = (page - 1) * limit;
 
     const productsQuery = db
       .select()
       .from(products)
-      .orderBy(asc(products.expiredDate))
+      .orderBy(asc(products[sortBy]))
       .limit(limit)
       .offset(offset);
     const totalProductsQuery = db.$count(products);
