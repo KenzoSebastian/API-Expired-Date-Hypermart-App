@@ -1,6 +1,6 @@
 import { addDays, format } from "date-fns";
-import { enUS } from "date-fns/locale";
-import { asc, count } from "drizzle-orm";
+import { de, enUS } from "date-fns/locale";
+import { asc, count, desc } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { db } from "../config/db.js";
 import { products } from "../db/schema.js";
@@ -12,14 +12,16 @@ export const getAllProducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const sortBy = req.query.sortby || "expiredDate";
+    const order = req.query.order || "asc";
     const offset = (page - 1) * limit;
 
-    const productsQuery = db
-      .select()
-      .from(products)
-      .orderBy(asc(products[sortBy]))
-      .limit(limit)
-      .offset(offset);
+    const productsQuery =
+      order === "asc"
+        ? db.select().from(products).orderBy(asc(products[sortBy])).limit(limit).offset(offset)
+        : order === "desc"
+        ? db.select().from(products).orderBy(desc(products[sortBy])).limit(limit).offset(offset)
+        : null;
+
     const totalProductsQuery = db.$count(products);
 
     const [paginatedProducts, totalItems] = await Promise.all([productsQuery, totalProductsQuery]);
