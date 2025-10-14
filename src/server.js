@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-app.use("/api", ProductRoute);
+app.use("/api/products", ProductRoute);
 
 app.use("/", (req, res) => {
   res.status(404).json({ status: "ERROR", message: "Endpoint not found" });
