@@ -190,6 +190,11 @@ export const getProductById = async (req, res) => {
       });
     }
 
+    // date formatting
+    product.expiredDate = format(product.expiredDate, "dd MMMM yyyy", { locale: enUS });
+    product.createdAt = format(product.createdAt, "dd MMMM yyyy", { locale: enUS });
+    product.updatedAt = format(product.updatedAt, "dd MMMM yyyy", { locale: enUS });
+
     return res.status(200).json({
       status: "success",
       message: "Product retrieved successfully.",
