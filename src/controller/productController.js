@@ -1,6 +1,6 @@
 import { addDays, format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
-import { asc, count, desc, exists, ilike } from "drizzle-orm";
+import { asc, count, desc, eq, exists, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { db } from "../config/db.js";
 import { products } from "../db/schema.js";
@@ -169,6 +169,37 @@ export const getProductsByCategory = async (req, res) => {
     return res.status(500).json({
       status: "error",
       message: "Failed to fetch products. Please try again later.",
+      data: null,
+    });
+  }
+};
+
+export const getProductById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const product = await db.query.products.findFirst({
+      where: eq(products.id, parseInt(id)),
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        status: "error",
+        message: "Product not found.",
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Product retrieved successfully.",
+      data: product,
+    });
+  } catch (error) {
+    console.error(`Error fetching product with ID '${id}':`, error);
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to fetch product. Please try again later.",
       data: null,
     });
   }

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAllProducts,
+  getProductById,
   getProductsByCategory,
   getProductsByquerySearch,
   uploadProducts,
@@ -14,6 +15,8 @@ const upload = multer({ storage });
 ProductRoute.get("/", getAllProducts);
 
 ProductRoute.get("/search", getProductsByquerySearch);
+
+ProductRoute.get("/searchId/:id", getProductById);
 
 ProductRoute.get("/categories/:productCategory", getProductsByCategory);
 
