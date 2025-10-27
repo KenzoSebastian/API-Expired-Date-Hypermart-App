@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { ENV } from "./config/env.js";
 import ProductRoute from "./route/products.js";
+import NotificationRoute from "./route/notification.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/products", ProductRoute);
+app.use("/api/notification", NotificationRoute);
 
 app.use("/", (req, res) => {
   res.status(404).json({ status: "ERROR", message: "Endpoint not found" });
