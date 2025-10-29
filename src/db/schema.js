@@ -10,3 +10,11 @@ export const products = pgTable("products", {
   createdAt: date("created_at").notNull().defaultNow(),
   updatedAt: date("updated_at").notNull().defaultNow(),
 });
+
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey(),
+  username: varchar("username", { length: 255 }).notNull().unique(),
+  expoPushToken: text("expo_push_token").notNull(),
+  createdAt: date("created_at").notNull().defaultNow(),
+  updatedAt: date("updated_at").notNull().defaultNow(),
+});

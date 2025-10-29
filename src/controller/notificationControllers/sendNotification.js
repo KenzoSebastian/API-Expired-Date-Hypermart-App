@@ -3,7 +3,7 @@ import { Expo } from "expo-server-sdk";
 const expo = new Expo();
 
 export const sendNotification = async (req, res) => {
-  const { token, title, body, metaData } = req.body;
+  const { token, title, body, metaData } = req.body || { token: null, title: "", body: "", metaData: {} };
   if (!Expo.isExpoPushToken(token)) {
     return res.status(400).json({ status: "error", message: "Invalid Expo push token" });
   }
