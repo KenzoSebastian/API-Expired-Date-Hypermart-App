@@ -3,13 +3,11 @@ import { db } from "../../config/db.js";
 import { users } from "../../db/schema.js";
 
 export const addUser = async (req, res) => {
-  const { userId, username, expoPushToken, email, memberSince, storeCode } = req.body;
+  const { userId, username, expoPushToken, email, memberSince, storeCode, imageUrl } = req.body;
 
   // Validate request body
-  if (!userId || !username || !expoPushToken || !email || !memberSince || !storeCode) {
-    return res
-      .status(400)
-      .json({ status: "error", message: "some fields are required.", data: null });
+  if (!userId || !username || !expoPushToken || !email || !memberSince || !storeCode || !imageUrl) {
+    return res.status(400).json({ status: "error", message: "some fields are required.", data: null });
   }
 
   // Validate Expo Push Token
@@ -28,6 +26,7 @@ export const addUser = async (req, res) => {
         email,
         memberSince,
         storeCode,
+        imageUrl,
       })
       .returning();
 
