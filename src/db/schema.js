@@ -14,6 +14,9 @@ export const products = pgTable("products", {
 export const users = pgTable("users", {
   id: varchar("id").primaryKey(),
   username: varchar("username", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  memberSince: date("member_since").notNull(),
+  storeCode: integer("store_code").notNull(),
   expoPushToken: text("expo_push_token").notNull(),
   createdAt: date("created_at").notNull().defaultNow(),
   updatedAt: date("updated_at").notNull().defaultNow(),
