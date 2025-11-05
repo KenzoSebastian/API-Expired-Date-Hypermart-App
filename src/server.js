@@ -4,9 +4,8 @@ import { fileURLToPath } from "url";
 import { ENV } from "./config/env.js";
 import ProductRoute from "./route/products.js";
 import NotificationRoute from "./route/notification.js";
-import cron from "node-cron";
-import axios from "axios";
 import UserRoute from "./route/users.js";
+import { notifSender } from "./helper/notifSender.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,34 +34,5 @@ app.use("/", (req, res) => {
 
 app.listen(ENV.PORT, () => {
   console.log(`Server is running on port ${ENV.PORT}`);
-
-  // cron.schedule("* * * * *", async () => {
-  //   console.log("------------------------------------------------");
-  //   console.log("Cron job: Mencoba mengirim notifikasi otomatis...");
-
-  //   try {
-  //     const response = await axios.post(`http://localhost:${ENV.PORT}/api/notification/send`, {
-  //       token: ENV.EXPO_TOKEN,
-  //       title: "Notifikasi Otomatis",
-  //       body: "Ini adalah notifikasi otomatis yang dikirim setiap menit.",
-  //       metaData: { info: "Data tambahan jika diperlukan" },
-  //     });
-  //     console.log("Notifikasi otomatis berhasil dikirim:", response.data);
-  //   } catch (error) {
-  //     console.error("Gagal mengirim notifikasi otomatis:");
-  //     if (error.response) {
-  //       // Server merespons dengan status error (e.g., 4xx, 5xx)
-  //       console.error("Status:", error.response.status);
-  //       console.error("Data:", error.response.data);
-  //     } else if (error.request) {
-  //       // Request dibuat tapi tidak ada respons
-  //       console.error("Tidak ada respons dari server:", error.request);
-  //     } else {
-  //       // Ada yang salah saat menyiapkan request
-  //       console.error("Pesan Error:", error.message);
-  //     }
-  //   }
-  //   console.log("Cron job selesai.");
-  //   console.log("------------------------------------------");
-  // });
+  // notifSender();
 });

@@ -21,7 +21,7 @@ export const sendNotification = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Notification sent successfully",
-      data: tickets,
+      data: tickets[0],
     });
   } catch (error) {
     console.error("Error sending notification:", error);

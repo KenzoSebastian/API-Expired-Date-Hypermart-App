@@ -1,4 +1,4 @@
-import { date, decimal, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { boolean,date, decimal, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
 
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -21,4 +21,13 @@ export const users = pgTable("users", {
   expoPushToken: text("expo_push_token").notNull(),
   createdAt: date("created_at").notNull().defaultNow(),
   updatedAt: date("updated_at").notNull().defaultNow(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  seen: boolean("seen").notNull().default(false),
+  createdAt: date("created_at").notNull().defaultNow(),
 });
