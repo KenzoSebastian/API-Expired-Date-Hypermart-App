@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import { json } from "stream/consumers";
 import { axiosInstance } from "../config/axios.js";
 
 export const notifSender = () =>
@@ -7,7 +8,7 @@ export const notifSender = () =>
     console.log("Cron job: Mencoba mengirim notifikasi otomatis...");
 
     try {
-      const { data: usersResponse } = await axiosInstance.get("users");
+      const { data: usersResponse } = await axiosInstance.get("/users");
 
       if (usersResponse.status !== "success" || !Array.isArray(usersResponse.data)) {
         console.warn("Gagal mengambil data user atau format data tidak sesuai.");
@@ -30,11 +31,18 @@ export const notifSender = () =>
         }
 
         try {
-          const { data: sendNotifResponse } = await axiosInstance.post("notification/send", {
+          const { data: productCheckResult } = await axiosInstance.get("/products/check");
+
+          if (productCheckResult.status !== "success") {
+            console.warn("Gagal mengambil data produk.");
+            return;
+          }
+
+          const { data: sendNotifResponse } = await axiosInstance.post("/notification/send", {
             token: user.expoPushToken,
-            title: "Notifikasi Otomatis",
-            body: "Ini adalah notifikasi otomatis yang dikirim setiap menit.",
-            metaData: { info: "Data tambahan jika diperlukan", userId: user.id },
+            title: productCheckResult.title,
+            body: productCheckResult.message,
+            metaData: productCheckResult.data,
           });
 
           if (
@@ -51,8 +59,8 @@ export const notifSender = () =>
           const { data: saveNotifResponse } = await axiosInstance.post("notification/save", {
             id: notificationId,
             userId: user.id,
-            title: "Notifikasi Otomatis",
-            message: "Ini adalah notifikasi otomatis yang dikirim setiap menit.",
+            title: productCheckResult.title,
+            message: productCheckResult.message,
           });
 
           if (saveNotifResponse.status === "success") {
@@ -89,7 +97,6 @@ export const notifSender = () =>
       console.log(
         `Ringkasan: ${successfulCount} notifikasi berhasil, ${failedCount} gagal, ${skippedCount} dilewati.`
       );
-
     } catch (error) {
       console.error("Gagal menjalankan cron job notifikasi keseluruhan:");
       if (error.response) {

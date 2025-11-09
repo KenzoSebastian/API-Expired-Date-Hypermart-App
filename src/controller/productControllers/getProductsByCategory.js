@@ -1,19 +1,12 @@
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { fetchAndCountProducts } from "../../helper/fetchAndCountProducts.js";
+import { getCategoryDateFormatter } from "../../helper/getCategoryDateFormatter.js";
 
 export const getProductsByCategory = async (req, res) => {
   const { productCategory } = req.params;
 
-  const todayStartOfDay = new Date();
-  todayStartOfDay.setHours(0, 0, 0, 0);
-
-  const sevenDaysFromNow = addDays(todayStartOfDay, 7);
-  const fourteenDaysFromNow = addDays(todayStartOfDay, 14);
-
-  const formatToday = format(todayStartOfDay, "yyyy-MM-dd", { locale: enUS });
-  const formatSevenDays = format(sevenDaysFromNow, "yyyy-MM-dd", { locale: enUS });
-  const formatFourteenDays = format(fourteenDaysFromNow, "yyyy-MM-dd", { locale: enUS });
+  const { formatFourteenDays, formatSevenDays, formatToday } = getCategoryDateFormatter();
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;

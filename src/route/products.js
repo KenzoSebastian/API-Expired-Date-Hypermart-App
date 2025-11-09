@@ -5,6 +5,7 @@ import { getProductsByquerySearch } from "../controller/productControllers/getPr
 import { getProductById } from "../controller/productControllers/getProductById.js";
 import { getProductsByCategory } from "../controller/productControllers/getProductsByCategory.js";
 import { uploadProducts } from "../controller/productControllers/uploadProducts.js";
+import { getProductCheck } from "../controller/productControllers/getProductCheck.js";
 
 const ProductRoute = express.Router();
 const storage = multer.memoryStorage();
@@ -13,6 +14,8 @@ const upload = multer({ storage });
 ProductRoute.get("/", getAllProducts);
 
 ProductRoute.get("/search", getProductsByquerySearch);
+
+ProductRoute.get("/check", getProductCheck);
 
 ProductRoute.get("/searchId/:id", getProductById);
 
