@@ -3,8 +3,11 @@ import { sendNotification } from "../controller/notificationControllers/sendNoti
 import { getNotifications } from "../controller/notificationControllers/getNotification.js";
 import { saveNotification } from "../controller/notificationControllers/saveNotification.js";
 import { deleteNotification } from "../controller/notificationControllers/deleteNotification.js";
+import { getCronJobNotifications } from "../controller/notificationControllers/getCronJobNotifications.js";
 
 const NotificationRoute = express.Router();
+
+NotificationRoute.get("/cronJob", getCronJobNotifications);
 
 NotificationRoute.get("/:userId", getNotifications);
 
