@@ -1,6 +1,6 @@
 import { db } from "../../config/db.js";
 import { getCategoryDateFormatter } from "../../helper/getCategoryDateFormatter.js";
-import { randomElement } from "../../helper/RandomElemenArray.js";
+import { randomElement } from "../../helper/randomElemenArray.js";
 import { notificationTemplates } from "../../lib/notificationTemplates.js";
 
 export const getProductCheck = async (req, res) => {
