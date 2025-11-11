@@ -16,8 +16,8 @@ NotificationRoute.post("/send", sendNotification);
 
 NotificationRoute.post("/save", saveNotification);
 
-NotificationRoute.patch("/update/:id", updateSeenNotification);
+NotificationRoute.patch("/update", updateSeenNotification);
 
-NotificationRoute.delete("/delete/:id", deleteNotification);
+NotificationRoute.delete("/delete", deleteNotification);
 
 export default NotificationRoute;

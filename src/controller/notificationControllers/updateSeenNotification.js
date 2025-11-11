@@ -3,7 +3,7 @@ import { db } from "../../config/db.js";
 import { eq } from "drizzle-orm";
 
 export const updateSeenNotification = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
 
   if (!id) {
     return res.status(400).json({ status: "error", message: "ID is required.", data: null });

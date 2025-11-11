@@ -3,7 +3,7 @@ import { db } from "../../config/db.js";
 import { eq } from "drizzle-orm";
 
 export const deleteNotification = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
 
   try {
     const data = await db.delete(notifications).where(eq(notifications.id, id)).returning();
