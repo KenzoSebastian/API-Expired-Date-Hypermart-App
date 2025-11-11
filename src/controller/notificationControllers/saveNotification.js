@@ -1,12 +1,26 @@
+import { format, addHours } from "date-fns";
 import { db } from "../../config/db.js";
 import { notifications } from "../../db/schema.js";
 
 export const saveNotification = async (req, res) => {
-  const { id, userId, productId, title, message } = req.body;
+  const { id: notificationId, userId, productId, title, message } = req.body;
+
+  if (!notificationId || !userId || !productId || !title || !message) {
+    return res.status(400).json({ status: "error", message: "Some fields are required.", data: null });
+  }
+  const localeDate = addHours(new Date(), 7);
+
   try {
     const newNotification = await db
       .insert(notifications)
-      .values({ id, userId, productId, title, message })
+      .values({
+        id: notificationId,
+        userId,
+        productId,
+        title,
+        message,
+        createdAt: localeDate,
+      })
       .returning();
     return res
       .status(201)

@@ -1,4 +1,4 @@
-import { boolean, date, decimal, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { boolean, date, decimal, integer, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const products = pgTable("products", {
   id: integer("id").primaryKey(),
@@ -34,5 +34,5 @@ export const notifications = pgTable("notifications", {
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
   seen: boolean("seen").notNull().default(false),
-  createdAt: date("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
