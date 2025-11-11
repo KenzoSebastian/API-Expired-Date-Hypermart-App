@@ -60,6 +60,7 @@ export const getCronJobNotifications = async (req, res) => {
         const { data: saveNotificationResponse } = await axiosInstance.post("notification/save", {
           id: notificationId,
           userId: user.id,
+          productId: productCheckResult.data.id,
           title: productCheckResult.title,
           message: productCheckResult.message,
         });

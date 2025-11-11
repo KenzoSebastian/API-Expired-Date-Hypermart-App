@@ -1,7 +1,7 @@
-import { boolean,date, decimal, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { boolean, date, decimal, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
 
 export const products = pgTable("products", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey(),
   sjStmNumber: varchar("sj_stm_Number", { length: 255 }).notNull(),
   skuNumber: integer("sku_number").notNull(),
   description: text("description").notNull(),
@@ -25,7 +25,12 @@ export const users = pgTable("users", {
 
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey(),
-  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  productId: integer("product_id")
+    .notNull()
+    .references(() => products.id),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
   seen: boolean("seen").notNull().default(false),
