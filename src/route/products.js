@@ -7,6 +7,7 @@ import { getProductsByCategory } from "../controller/productControllers/getProdu
 import { uploadProducts } from "../controller/productControllers/uploadProducts.js";
 import { getProductCheck } from "../controller/productControllers/getProductCheck.js";
 import { updateQuantityProduct } from "../controller/productControllers/updateQuantityProduct.js";
+import { deleteProduct } from "../controller/productControllers/deleteProduct.js";
 
 const ProductRoute = express.Router();
 const storage = multer.memoryStorage();
@@ -21,6 +22,8 @@ ProductRoute.get("/check", getProductCheck);
 ProductRoute.get("/searchId/:id", getProductById);
 
 ProductRoute.patch("/update/quantity", updateQuantityProduct);
+
+ProductRoute.delete("/delete", deleteProduct);
 
 ProductRoute.get("/categories/:productCategory", getProductsByCategory);
 
