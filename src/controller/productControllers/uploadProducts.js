@@ -81,7 +81,7 @@ export const uploadProducts = async (req, res) => {
       successMessage += ` However, ${invalidRows.length} row(s) contained invalid data and were skipped.`;
     }
 
-    res.status(200).json({
+    res.status(201).json({
       status: "success",
       message: successMessage,
       data: insertedProducts,
