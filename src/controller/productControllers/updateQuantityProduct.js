@@ -17,7 +17,7 @@ export const updateQuantityProduct = async (req, res) => {
     const updatedUser = await db
       .update(products)
       .set({
-        expoPushToken,
+        quantity,
         updatedAt: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       })
       .where(eq(products.id, id))
