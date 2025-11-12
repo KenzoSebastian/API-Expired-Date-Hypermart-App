@@ -7,7 +7,6 @@ import { products } from "../../db/schema.js";
 export const getProductsByquerySearch = async (req, res) => {
   try {
     const querySearch = req.query.searchQuery || null;
-
     const productsQuery = db
       .select()
       .from(products)
