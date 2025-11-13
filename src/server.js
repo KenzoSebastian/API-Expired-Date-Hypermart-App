@@ -5,7 +5,6 @@ import { ENV } from "./config/env.js";
 import ProductRoute from "./route/products.js";
 import NotificationRoute from "./route/notification.js";
 import UserRoute from "./route/users.js";
-import { notifSender } from "./helper/notifSender.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,5 +33,4 @@ app.use("/", (req, res) => {
 
 app.listen(ENV.PORT, () => {
   console.log(`Server is running on port ${ENV.PORT}`);
-  notifSender();
 });
